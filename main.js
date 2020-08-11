@@ -1,7 +1,6 @@
-var electron = require('electron')
+const electron = require('electron');
+const { app, BrowserWindow, Tray } = electron;
 var RPC = require('electron-rpc/server')
-var app = electron.app
-var BrowserWindow = electron.BrowserWindow;
 var path = require('path')
 var url = require('url')
 var main = require('../app.js');
@@ -10,7 +9,6 @@ var fs = require("fs");
 var path = require("path");
 var window;
 var exiting = false;
-var AppTray = electron.Tray
 var tray = null;
 
 var skeleton_info = {
@@ -71,7 +69,7 @@ function createWindow() {
 		maxHeight: 380,
 		frame: false,
 		resizable: false,
-		icon: path.join(__dirname, 'assets/icon.png'),
+		icon: path.join(__dirname, '/../assets/icon.png'),
 		webPreferences: {
 			pageVisibility: true,
 			nodeIntegration: true
@@ -158,6 +156,15 @@ function createWindow() {
 			system.emit('skeleton-info', 'appName', pkg.description);
 			system.emit('skeleton-info', 'appStatus', 'Starting');
 			system.emit('skeleton-info', 'configDir', app.getPath('appData') );
+
+			configureScope(function(scope) {
+				var machidFile = app.getPath('appData') + '/companion/machid'
+				var machid = fs.readFileSync(machidFile).toString().trim()
+				scope.setUser({"id": machid});
+				scope.setExtra("build",build.trim());
+			});
+
+
 		} catch (e) {
 			console.log("Error reading BUILD and/or package info: ", e);
 		}
@@ -165,7 +172,8 @@ function createWindow() {
 }
 
 function createTray() {
-	tray = new AppTray(
+	console.log(path.join(__dirname, '..', 'assets', 'trayTemplate.png'));
+	tray = new Tray(
 		process.platform == "darwin" ?
 		path.join(__dirname, '..', 'assets', 'trayTemplate.png') :
 		path.join(__dirname, '..', 'assets', 'icon.png')
@@ -188,7 +196,7 @@ function showWindow() {
 	window.focus()
 }
 
-app.on('ready', function () {
+app.whenReady().then(function () {
 	createTray();
 	createWindow();
 
