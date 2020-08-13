@@ -120,6 +120,9 @@ function createWindow() {
 
 	rpc.on('skeleton-minimize', function(req, cb) {
 		window.hide();
+		if (app.dock) {
+			app.dock.hide();
+		}
 	});
 
 	rpc.on('skeleton-bind-ip', function(req, cb) {
@@ -160,11 +163,17 @@ function createWindow() {
 
 	window.on('closed', function () {
 		window = null
+		if (app.dock) {
+			app.dock.hide();
+		}
 	});
 
 	window.on('ready-to-show', function () {
 		if (!skeleton_info.startMinimised) {
 			showWindow();
+			if (app.dock) {
+				app.dock.show();
+			}
 		}
 	});
 
@@ -193,7 +202,6 @@ function createWindow() {
 }
 
 function createTray() {
-	console.log(path.join(__dirname, '..', 'assets', 'trayTemplate.png'));
 	tray = new Tray(
 		process.platform == "darwin" ?
 		path.join(__dirname, '..', 'assets', 'trayTemplate.png') :
@@ -206,15 +214,24 @@ function createTray() {
 
 function toggleWindow() {
 	if (window.isVisible()) {
-		window.hide()
+		window.hide();
+		if (app.dock) {
+			app.dock.hide();
+		}
 	} else {
 		showWindow()
+		if (app.dock) {
+			app.dock.show();
+		}
 	}
 }
 
 function showWindow() {
 	window.show()
 	window.focus()
+	if (app.dock) {
+		app.dock.show();
+	}
 }
 
 app.whenReady().then(function () {
