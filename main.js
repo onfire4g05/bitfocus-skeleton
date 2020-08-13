@@ -10,6 +10,27 @@ var path = require("path");
 var window;
 var exiting = false;
 var tray = null;
+const { init, showReportDialog, configureScope } = require('@sentry/electron');
+
+function packageinfo() {
+	var self = this;
+	var fileContents = fs.readFileSync(__dirname + '/../package.json');
+	var object = JSON.parse(fileContents);
+	return object;
+};
+
+var b = fs.readFileSync(__dirname + "/../BUILD").toString().trim();
+
+init({
+	dsn: 'https://535745b2e446442ab024d1c93a349154@sentry.bitfocus.io/8',
+	release: 'companion@' + ( b !== undefined ? b.trim() : packageinfo().version),
+	beforeSend(event) {
+    if (event.exception) {
+      showReportDialog();
+    }
+    return event;
+  }
+});
 
 var skeleton_info = {
 	appName: '',
